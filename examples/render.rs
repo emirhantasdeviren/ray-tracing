@@ -2,24 +2,26 @@ use std::io::{self, BufWriter, Write};
 
 use env_logger::Env;
 use ray_tracing::color::Color;
-use ray_tracing::ray::Ray;
+use ray_tracing::ray::{Hittable, Ray, World};
+use ray_tracing::sphere::Sphere;
 use ray_tracing::vec::Vec3;
 
 fn write_ppm_color<W: Write>(mut write: W, color: Color) -> io::Result<()> {
     writeln!(write, "{} {} {}", color.r, color.g, color.b)
 }
 
-fn ray_color(ray: &Ray) -> Color {
-    let center = Vec3::new(0., 0., -1.);
-
-    if let Some(t) = ray.hits_sphere(&center, 0.5) {
-        let normal = (ray.at(t) - center).unit();
+fn ray_color<H: Hittable>(ray: &Ray, hittable: H) -> Color {
+    if let Some(rec) = hittable.hit(ray, 0., f32::INFINITY) {
         let normalized_color = 0.5f32
-            * Vec3::new(normal.i + 1f32, normal.j + 1f32, normal.k + 1f32);
+            * Vec3::new(
+                rec.normal.i + 1f32,
+                rec.normal.j + 1f32,
+                rec.normal.k + 1f32,
+            );
 
         return normalized_color
             .try_into()
-            .expect("color is not normalized)");
+            .expect("color is not normalized");
     }
 
     let unit_direction = ray.direction().unit();
@@ -76,6 +78,11 @@ fn main() {
     let pixel00_loc =
         viewport_upper_left + 0.5f32 * (pixel_delta_u + pixel_delta_v);
 
+    // World
+    let mut world = World::new();
+    world.add(Sphere::new((0., 0., -1.).into(), 0.5).unwrap());
+    world.add(Sphere::new((0., -100.5, -1.).into(), 100.).unwrap());
+
     // Render
     let mut file = BufWriter::new(
         std::fs::File::options()
@@ -97,7 +104,7 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
 
-            let color = ray_color(&ray);
+            let color = ray_color(&ray, &world);
             write_ppm_color(&mut file, color)
                 .expect("could not write color to file");
         }
