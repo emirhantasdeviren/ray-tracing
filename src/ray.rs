@@ -47,7 +47,12 @@ pub struct HitRecord {
 
 impl HitRecord {
     pub fn new(point: Vec3, normal: Vec3, t: f32, front_face: bool) -> Self {
-        Self { point, normal, t, front_face }
+        Self {
+            point,
+            normal,
+            t,
+            front_face,
+        }
     }
 }
 
