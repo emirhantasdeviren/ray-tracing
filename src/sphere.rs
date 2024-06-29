@@ -1,6 +1,7 @@
 use crate::ray::{HitRecord, Hittable, Ray};
 use crate::vec::Vec3;
 
+#[derive(Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: f32,
