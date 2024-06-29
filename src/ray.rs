@@ -39,10 +39,10 @@ impl Ray {
 }
 
 pub struct HitRecord {
-    point: Vec3,
-    normal: Vec3,
-    t: f32,
-    front_face: bool,
+    pub point: Vec3,
+    pub normal: Vec3,
+    pub t: f32,
+    pub front_face: bool,
 }
 
 impl HitRecord {
