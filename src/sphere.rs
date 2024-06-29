@@ -31,7 +31,7 @@ impl Hittable for Sphere {
 
         let d_sqrt = discriminant.sqrt();
 
-        let root: Option<f32> = {
+        let root = {
             let mut root = (h - d_sqrt) / a;
             if root <= t_min || root >= t_max {
                 root = (h + d_sqrt) / a;
