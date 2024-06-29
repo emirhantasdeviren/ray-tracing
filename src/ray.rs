@@ -61,3 +61,9 @@ pub trait Hittable {
 }
 
 pub struct World(Vec<Box<dyn Hittable + 'static>>);
+
+impl World {
+    pub fn new() -> World {
+        Self(vec![])
+    }
+}
