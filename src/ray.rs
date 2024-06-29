@@ -78,4 +78,20 @@ impl World {
         self.0.clear()
     }
 }
+
+impl Hittable for World {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        let mut rec = None;
+        let mut closest_so_far = t_max;
+
+        for hittable in self.0.iter() {
+            if let Some(closest_rec) = hittable.hit(ray, t_min, closest_so_far)
+            {
+                closest_so_far = closest_rec.t;
+                rec = Some(closest_rec);
+            }
+        }
+
+        rec
+    }
 }
