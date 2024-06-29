@@ -66,4 +66,11 @@ impl World {
     pub fn new() -> World {
         Self(vec![])
     }
+
+    pub fn add<H>(&mut self, hittable: H)
+    where
+        H: Hittable + Clone + 'static,
+    {
+        self.0.push(Box::new(hittable.clone()))
+    }
 }
