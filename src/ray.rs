@@ -60,6 +60,12 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
 }
 
+impl<T: Hittable> Hittable for &T {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        (*self).hit(ray, t_min, t_max)
+    }
+}
+
 pub struct World(Vec<Box<dyn Hittable + 'static>>);
 
 impl World {
