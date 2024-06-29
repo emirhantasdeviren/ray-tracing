@@ -73,4 +73,9 @@ impl World {
     {
         self.0.push(Box::new(hittable.clone()))
     }
+
+    pub fn clear(&mut self) {
+        self.0.clear()
+    }
+}
 }
