@@ -59,3 +59,39 @@ impl HitRecord {
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
 }
+
+pub struct World(Vec<Box<dyn Hittable + 'static>>);
+
+impl World {
+    pub fn new() -> World {
+        Self(vec![])
+    }
+
+    pub fn add<H>(&mut self, hittable: H)
+    where
+        H: Hittable + Clone + 'static,
+    {
+        self.0.push(Box::new(hittable.clone()))
+    }
+
+    pub fn clear(&mut self) {
+        self.0.clear()
+    }
+}
+
+impl Hittable for World {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        let mut rec = None;
+        let mut closest_so_far = t_max;
+
+        for hittable in self.0.iter() {
+            if let Some(closest_rec) = hittable.hit(ray, t_min, closest_so_far)
+            {
+                closest_so_far = closest_rec.t;
+                rec = Some(closest_rec);
+            }
+        }
+
+        rec
+    }
+}
