@@ -48,9 +48,15 @@ impl Hittable for Sphere {
         root.map(|root| {
             let t = root;
             let point = ray.at(t);
-            let normal = (point - self.center) / self.radius;
+            let out_normal = (point - self.center) / self.radius;
+            let front_face = ray.direction().dot(&out_normal).is_sign_negative();
+            let normal = if front_face {
+                out_normal
+            } else {
+                -out_normal
+            };
 
-            HitRecord::new(point, normal, t)
+            HitRecord::new(point, normal, t, front_face)
         })
     }
 }
