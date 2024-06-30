@@ -2,6 +2,7 @@ use std::io::{self, BufWriter, Write};
 
 use env_logger::Env;
 use ray_tracing::color::Color;
+use ray_tracing::interval::Interval;
 use ray_tracing::ray::{Hittable, Ray, World};
 use ray_tracing::sphere::Sphere;
 use ray_tracing::vec::Vec3;
@@ -11,7 +12,7 @@ fn write_ppm_color<W: Write>(mut write: W, color: Color) -> io::Result<()> {
 }
 
 fn ray_color<H: Hittable>(ray: &Ray, hittable: H) -> Color {
-    if let Some(rec) = hittable.hit(ray, 0., f32::INFINITY) {
+    if let Some(rec) = hittable.hit(ray, Interval::new(0., f32::INFINITY)) {
         let normalized_color = 0.5f32
             * Vec3::new(
                 rec.normal.i + 1f32,
