@@ -1,3 +1,8 @@
+use std::io::{self, Write};
+
+use crate::color::Color;
+use crate::interval::Interval;
+use crate::ray::{Hittable, Ray};
 use crate::vec::Vec3;
 
 pub struct Camera {
@@ -50,5 +55,65 @@ impl Camera {
             pixel_delta_u,
             pixel_delta_v,
         }
+    }
+
+    pub fn render<H, W>(&self, hittable: H, mut write: W)
+    where
+        H: Hittable,
+        W: Write,
+    {
+        write!(
+            write,
+            "P3\n{} {}\n255\n",
+            self.image_width, self.image_height
+        )
+        .unwrap();
+
+        for j in 0..self.image_height {
+            log::info!("Scanlines remaining: {}", self.image_height - j);
+            for i in 0..self.image_width {
+                let pixel_center = self.pixel00_loc
+                    + (i * self.pixel_delta_u)
+                    + (j * self.pixel_delta_v);
+                let ray_direction = pixel_center - self.center;
+                let ray = Ray::new(self.center, ray_direction);
+
+                let color = Self::ray_color(&ray, &hittable);
+                Self::write_ppm_color(&mut write, color)
+                    .expect("could not write color to file");
+            }
+        }
+
+        write.flush().expect("could not write buffer to file");
+        log::info!("Done.");
+    }
+
+    fn ray_color<H: Hittable>(ray: &Ray, hittable: H) -> Color {
+        if let Some(rec) = hittable.hit(ray, Interval::new(0., f32::INFINITY)) {
+            let normalized_color = 0.5f32
+                * Vec3::new(
+                    rec.normal.i + 1f32,
+                    rec.normal.j + 1f32,
+                    rec.normal.k + 1f32,
+                );
+
+            return normalized_color
+                .try_into()
+                .expect("color is not normalized");
+        }
+
+        let unit_direction = ray.direction().unit();
+        let a = 0.5f32 * (unit_direction.j + 1f32);
+
+        let normalized_color =
+            (1f32 - a) * Vec3::new(1., 1., 1.) + a * Vec3::new(0.5, 0.7, 1.0);
+
+        normalized_color
+            .try_into()
+            .expect("color is not normalized")
+    }
+
+    fn write_ppm_color<W: Write>(mut write: W, color: Color) -> io::Result<()> {
+        writeln!(write, "{} {} {}", color.r, color.g, color.b)
     }
 }
