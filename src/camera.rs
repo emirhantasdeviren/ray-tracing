@@ -9,3 +9,9 @@ pub struct Camera {
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
 }
+
+impl Default for Camera {
+    fn default() -> Self {
+        Self::new(1.0, 100)
+    }
+}
